@@ -1,0 +1,100 @@
+using System;
+
+class JogoDaVelha
+{
+    static char[,] tabuleiro = {
+        { '1', '2', '3' },
+        { '4', '5', '6' },
+        { '7', '8', '9' }
+    };
+
+    static char jogadorAtual = 'X';
+
+    static void Main()
+    {
+        int jogadas = 0;
+        bool vitoria = false;
+
+        while (!vitoria && jogadas < 9)
+        {
+            Console.Clear();
+            MostrarTabuleiro();
+
+            Console.Write($"\nJogador {jogadorAtual}, escolha uma posição: ");
+            string entrada = Console.ReadLine();
+
+            if (int.TryParse(entrada, out int posicao) && posicao >= 1 && posicao <= 9)
+            {
+                if (MarcarPosicao(posicao))
+                {
+                    jogadas++;
+                    vitoria = VerificarVitoria();
+                    if (!vitoria)
+                        jogadorAtual = jogadorAtual == 'X' ? 'O' : 'X';
+                }
+                else
+                {
+                    Console.WriteLine("Posição já ocupada! Pressione Enter para tentar novamente.");
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Entrada inválida. Pressione Enter para tentar novamente.");
+                Console.ReadLine();
+            }
+        }
+
+        Console.Clear();
+        MostrarTabuleiro();
+
+        if (vitoria)
+        {
+            Console.WriteLine($"\nParabéns! Jogador {jogadorAtual} venceu!");
+        }
+        else
+        {
+            Console.WriteLine("\nEmpate!");
+        }
+    }
+
+    static void MostrarTabuleiro()
+    {
+        Console.WriteLine("=== Jogo da Velha ===");
+        Console.WriteLine();
+        Console.WriteLine($" {tabuleiro[0, 0]} | {tabuleiro[0, 1]} | {tabuleiro[0, 2]} ");
+        Console.WriteLine("---+---+---");
+        Console.WriteLine($" {tabuleiro[1, 0]} | {tabuleiro[1, 1]} | {tabuleiro[1, 2]} ");
+        Console.WriteLine("---+---+---");
+        Console.WriteLine($" {tabuleiro[2, 0]} | {tabuleiro[2, 1]} | {tabuleiro[2, 2]} ");
+    }
+
+    static bool MarcarPosicao(int posicao)
+    {
+        int linha = (posicao - 1) / 3;
+        int coluna = (posicao - 1) % 3;
+
+        if (tabuleiro[linha, coluna] != 'X' && tabuleiro[linha, coluna] != 'O')
+        {
+            tabuleiro[linha, coluna] = jogadorAtual;
+            return true;
+        }
+        return false;
+    }
+
+    static bool VerificarVitoria()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if ((tabuleiro[i, 0] == jogadorAtual && tabuleiro[i, 1] == jogadorAtual && tabuleiro[i, 2] == jogadorAtual) ||
+                (tabuleiro[0, i] == jogadorAtual && tabuleiro[1, i] == jogadorAtual && tabuleiro[2, i] == jogadorAtual))
+                return true;
+        }
+
+        if ((tabuleiro[0, 0] == jogadorAtual && tabuleiro[1, 1] == jogadorAtual && tabuleiro[2, 2] == jogadorAtual) ||
+            (tabuleiro[0, 2] == jogadorAtual && tabuleiro[1, 1] == jogadorAtual && tabuleiro[2, 0] == jogadorAtual))
+            return true;
+
+        return false;
+    }
+}
