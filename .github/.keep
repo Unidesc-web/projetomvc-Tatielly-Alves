@@ -1,0 +1,126 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+
+namespace RestauranteMVC.Models
+{
+    public class Prato
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [Display(Name = "Nome do Prato")]
+        public string Nome { get; set; }
+
+        [Display(Name = "Descrição")]
+        public string Descricao { get; set; }
+
+        [Required]
+        [Display(Name = "Preço (R$)")]
+        public decimal Preco { get; set; }
+    }
+
+    public class RestauranteContext : DbContext
+    {
+        public DbSet<Prato> Pratos { get; set; }
+    }
+}
+
+namespace RestauranteMVC.Controllers
+{
+    public class PratosController : Controller
+    {
+        private RestauranteContext db = new RestauranteContext();
+
+        public ActionResult Index()
+        {
+            return View(db.Pratos.ToList());
+        }
+
+        public ActionResult Details(int id)
+        {
+            var prato = db.Pratos.Find(id);
+            if (prato == null) return HttpNotFound();
+            return View(prato);
+        }
+
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Create(Prato prato)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Pratos.Add(prato);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(prato);
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var prato = db.Pratos.Find(id);
+            if (prato == null) return HttpNotFound();
+            return View(prato);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(Prato prato)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(prato).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(prato);
+        }
+
+        public ActionResult Delete(int id)
+        {
+            var prato = db.Pratos.Find(id);
+            if (prato == null) return HttpNotFound();
+            return View(prato);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            var prato = db.Pratos.Find(id);
+            db.Pratos.Remove(prato);
+            db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+    }
+}
+
+// Views (exemplo em Razor - Views/Pratos/Index.cshtml):
+@model IEnumerable<RestauranteMVC.Models.Prato>
+@{
+    ViewBag.Title = "Lista de Pratos";
+}
+<h2>Pratos</h2>
+<p>@Html.ActionLink("Novo Prato", "Create")</p>
+<table class="table">
+    <tr><th>Nome</th><th>Preço</th><th>Ações</th></tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Nome</td>
+            <td>@item.Preco.ToString("C")</td>
+            <td>
+                @Html.ActionLink("Detalhes", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Editar", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Excluir", "Delete", new { id = item.Id })
+            </td>
+        </tr>
+    }
+</table>
